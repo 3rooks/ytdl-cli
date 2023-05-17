@@ -4,7 +4,10 @@
         "module": "Node16",
         "baseUrl": "./",
         "paths": {
-            "#lib/*": ["./src/lib/*"]
+            "#lib/*": ["./src/lib/*"],
+            "#constants/*": ["./src/constants/*"],
+            "#utils/*": ["./src/utils/*"],
+            "#config/*": ["./src/config/*"]
         }
     }
 }

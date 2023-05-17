@@ -1,10 +1,8 @@
-import { hello } from '#lib/hello.js';
-import { quest } from '#lib/quest.js';
+import '#config/env.js';
+import { toDownload } from '#utils/quest.js';
 
 const bootstrap = async () => {
-    hello();
-    const res = await quest();
-    console.log('RESPONSEEEEE', res);
+    await toDownload();
 };
 
 await bootstrap();

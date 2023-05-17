@@ -14,7 +14,11 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "cheerio": "1.0.0-rc.12",
+        "dotenv": "16.0.3",
+        "googleapis": "118.0.0",
         "inquirer": "9.2.3",
+        "miniget": "4.2.2",
         "youtube-dl-exec": "2.4.2"
     },
     "devDependencies": {
@@ -28,6 +32,9 @@
         "prettier": "2.8.8"
     },
     "imports": {
-        "#lib/*": "./src/lib/*"
+        "#lib/*": "./src/lib/*",
+        "#constants/*": "./src/constants/*",
+        "#utils/*": "./src/utils/*",
+        "#config/*": "./src/config/*"
     }
 }
