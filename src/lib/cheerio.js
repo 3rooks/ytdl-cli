@@ -41,7 +41,7 @@ export const getChannelId = async (url) => {
     return channelId;
 };
 
-export const videoId = async (videoUrl) => {
+export const getVideoId = async (videoUrl) => {
     /*
         https://www.youtube.com/watch?v=[videoId]
         https://youtu.be/[videoId]

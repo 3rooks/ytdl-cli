@@ -1,8 +1,12 @@
+#!/usr/bin/env node
 import '#config/env.js';
-import { toDownload } from '#utils/quest.js';
+import { initTitle } from '#lib/figlet.js';
+import { userInput } from '#lib/inquierer.js';
 
 const bootstrap = async () => {
-    await toDownload();
+    await initTitle('Y T D L');
+    const userAnswer = await userInput();
+    console.log(userAnswer);
 };
 
 await bootstrap();
