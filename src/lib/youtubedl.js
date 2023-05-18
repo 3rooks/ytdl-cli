@@ -1,60 +1,22 @@
 import { COLORS } from '#constants/colors.js';
 import { DOWNLOAD_OPTIONS } from '#constants/dl.js';
+import { fileExists } from '#utils/file-exists.js';
+import { join } from 'path';
 import youtubeDl from 'youtube-dl-exec';
 import { getChannelId, getProfileImg, getVideoId } from './cheerio.js';
 import { cliProgress } from './cliprogress.js';
-import { getAllVideosFromChannel } from './googleapi.js';
+import { getAllVideosFromChannel, getVideoInfo } from './googleapi.js';
 import { saveImage } from './miniget.js';
 
 const { image, video, channel } = DOWNLOAD_OPTIONS;
 
-const template = `%(channel_id)s/%(uploader)s/%(title)s_%(id)s.%(ext)s`;
+const template = `%(channel_id)s/%(title)s_%(id)s.%(ext)s`; // /%(uploader)s
 const headers = ['referer:youtube.com', 'user-agent:googlebot'];
 const formats = 'best/bestvideo+bestaudio';
 const flags = {
     output: `${process.env.OUTPUT_PATH}/${template}`,
     format: formats,
     addHeader: headers
-};
-
-export const downloadImage = async (channelUrl) => {
-    const imgUrl = await getProfileImg(channelUrl);
-    const channelId = await getChannelId(channelUrl);
-
-    const output = await saveImage(imgUrl, channelId);
-    return `Image downloaded:\n[Dest]: ${output}`;
-};
-
-export const downloadVideo = async (videoUrl) => {
-    // const url = `https://www.youtube.com/watch?v=${}`;
-    return await youtubeDl(videoUrl, flags);
-};
-
-export const downloadChannel = async (channelUrl) => {
-    console.log('\n');
-    const channelId = await getChannelId(channelUrl);
-
-    const videoIds = await getAllVideosFromChannel(channelId);
-
-    const chunks = chunkArray(videoIds, 5);
-
-    for (const chunk of chunks) {
-        const downloadPromises = chunk.map(
-            async (videoId) => await downloadVideo(videoId)
-        );
-        const res = await Promise.all([...downloadPromises]);
-        res.map((data) => console.info(`${data}\n`));
-    }
-
-    return videoIds.length;
-};
-
-export const chunkArray = (arr, chunkSize) => {
-    const result = [];
-    for (let i = 0; i < arr.length; i += chunkSize) {
-        result.push(arr.slice(i, i + chunkSize));
-    }
-    return result;
 };
 
 export const toDownload = async (answer) => {
@@ -67,15 +29,33 @@ export const toDownload = async (answer) => {
     if (type === channel) await dlChannel(url);
 };
 
-const dlVideo = async (url) => {
+export const dlVideo = async (url) => {
     const videoId = getVideoId(url);
-    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-    const res = await youtubeDl(videoUrl, flags);
+    const videoInfo = await getVideoInfo(videoId);
+
+    const path = join(
+        process.env.OUTPUT_PATH,
+        `${videoInfo.channelId}`,
+        `${videoInfo.title}_${videoInfo.videoId}.mp4`
+    );
+    const exist = await fileExists(path);
+
+    if (exist) {
+        console.log(COLORS.BLUE, `[exist]: ${videoInfo.videoId}`);
+        process.exit(0);
+    }
+
+    const res = await youtubeDl(
+        `https://www.youtube.com/watch?v=${videoId}`,
+        flags
+    );
+
     console.log(COLORS.BLUE, res);
+    process.exit(0);
 };
 
-const dlImg = async (url) => {
+export const dlImg = async (url) => {
     const channelId = await getChannelId(url);
     const imgUrl = await getProfileImg(url);
 
@@ -83,13 +63,15 @@ const dlImg = async (url) => {
     console.log(COLORS.BLUE, `Image downloaded:\n[Dest]: ${output}`);
 };
 
-const dlChannel = async (url) => {
+export const dlChannel = async (url) => {
     const channelId = await getChannelId(url);
     const videoIds = await getAllVideosFromChannel(channelId);
 
-    const bar = await cliProgress(videoIds.length);
+    const clean = await cleanList(videoIds);
+
+    const bar = await cliProgress(clean.length);
     let count = 0;
-    const chunks = chunkArray(videoIds, 5);
+    const chunks = chunkArray(clean, 5);
 
     for (const chunk of chunks) {
         const downloadPromises = chunk.map(async (videoId) => {
@@ -106,6 +88,36 @@ const dlChannel = async (url) => {
     bar.stop();
     console.log(
         COLORS.BLUE,
-        `Channel downloaded:\n[channel]: ${channelId}\n[total]: ${videoIds.length}`
+        `Channel downloaded:\n[channel]: ${channelId}\n[total]: ${clean.length}`
     );
+};
+
+export const chunkArray = (arr, chunkSize) => {
+    const result = [];
+    for (let i = 0; i < arr.length; i += chunkSize) {
+        result.push(arr.slice(i, i + chunkSize));
+    }
+    return result;
+};
+
+export const cleanList = async (videoIds) => {
+    const arr = [];
+
+    for (const videoId of videoIds) {
+        const videoInfo = await getVideoInfo(videoId);
+
+        if (!videoInfo) continue;
+
+        const path = join(
+            process.env.OUTPUT_PATH,
+            `${videoInfo.channelId}`,
+            `${videoInfo.title}_${videoInfo.videoId}.mp4`
+        );
+
+        const exist = await fileExists(path);
+
+        if (!exist) arr.push(videoId);
+    }
+
+    return arr;
 };
