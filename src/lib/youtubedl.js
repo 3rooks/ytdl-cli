@@ -2,6 +2,7 @@ import { COLORS } from '#constants/colors.js';
 import { DOWNLOAD_OPTIONS } from '#constants/dl.js';
 import youtubeDl from 'youtube-dl-exec';
 import { getChannelId, getProfileImg, getVideoId } from './cheerio.js';
+import { cliProgress } from './cliprogress.js';
 import { getAllVideosFromChannel } from './googleapi.js';
 import { saveImage } from './miniget.js';
 
@@ -13,7 +14,6 @@ const formats = 'best/bestvideo+bestaudio';
 const flags = {
     output: `${process.env.OUTPUT_PATH}/${template}`,
     format: formats,
-    cookies: process.env.YT_COOKIES,
     addHeader: headers
 };
 
@@ -60,11 +60,11 @@ export const chunkArray = (arr, chunkSize) => {
 export const toDownload = async (answer) => {
     const { type, url } = answer;
 
-    if (type === image) dlVideo(url);
+    if (type === image) await dlImg(url);
 
-    if (type === video) dlImg(url);
+    if (type === video) await dlVideo(url);
 
-    if (type === channel) dlChannel(url);
+    if (type === channel) await dlChannel(url);
 };
 
 const dlVideo = async (url) => {
@@ -84,5 +84,28 @@ const dlImg = async (url) => {
 };
 
 const dlChannel = async (url) => {
-    console.log('');
+    const channelId = await getChannelId(url);
+    const videoIds = await getAllVideosFromChannel(channelId);
+
+    const bar = await cliProgress(videoIds.length);
+    let count = 0;
+    const chunks = chunkArray(videoIds, 5);
+
+    for (const chunk of chunks) {
+        const downloadPromises = chunk.map(async (videoId) => {
+            await youtubeDl(
+                `https://www.youtube.com/watch?v=${videoId}`,
+                flags
+            );
+            count++;
+            bar.update(count);
+        });
+        await Promise.all([...downloadPromises]);
+    }
+
+    bar.stop();
+    console.log(
+        COLORS.BLUE,
+        `Channel downloaded:\n[channel]: ${channelId}\n[total]: ${videoIds.length}`
+    );
 };

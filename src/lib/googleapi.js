@@ -18,12 +18,29 @@ export const getAllVideosFromChannel = async (channelId) => {
         });
 
         if (response && response.data && response.data.items) {
-            videos.push(...response.data.items);
+            for (const item of response.data.items) {
+                const video = item.snippet;
+                const videoResponse = await youtube.videos.list({
+                    id: video.resourceId.videoId,
+                    part: ['snippet']
+                });
+
+                if (
+                    videoResponse &&
+                    videoResponse.data &&
+                    videoResponse.data.items
+                ) {
+                    const videoItem = videoResponse.data.items[0];
+                    if (videoItem.snippet.liveBroadcastContent === 'none') {
+                        videos.push(video.resourceId.videoId);
+                    } else continue;
+                }
+            }
             nextPageToken = response.data.nextPageToken;
         } else {
             nextPageToken = undefined;
         }
     } while (nextPageToken);
 
-    return videos.map((video) => video.snippet.resourceId.videoId);
+    return videos;
 };
