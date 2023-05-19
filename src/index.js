@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 import '#config/env.js';
+import { Status } from '#error/error.js';
 import { initTitle } from '#lib/figlet.js';
 import { userInput } from '#lib/inquierer.js';
-import { toDownload } from '#lib/youtubedl.js';
+import { downloader } from '#utils/downloader.js';
 
 const bootstrap = async () => {
-    await initTitle('Y T D L');
-    const userAnswer = await userInput();
-    await toDownload(userAnswer);
-    process.exit(0);
+    try {
+        await initTitle('Y T D L');
+        const userAnswer = await userInput();
+        await downloader(userAnswer);
+    } catch (error) {
+        Status.catch(error);
+    }
 };
 
 await bootstrap();

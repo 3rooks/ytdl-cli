@@ -1,7 +1,7 @@
 import { COLORS } from '#constants/colors.js';
 import figlet from 'figlet';
 
-const { GREEN } = COLORS;
+const { BLUE } = COLORS;
 
 export const initTitle = (title) => {
     return new Promise((resolve, reject) =>
@@ -14,7 +14,7 @@ export const initTitle = (title) => {
             (error, data) => {
                 if (error) reject(error);
                 else {
-                    console.log(GREEN, data, '\n');
+                    console.log(BLUE, data, '\n');
                     resolve(null);
                 }
             }

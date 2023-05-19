@@ -6,7 +6,7 @@ export const cliProgress = async (total) => {
     const barProgress = new Bar(
         {
             format: 'Downloading [{bar}] {percentage}% | {value}/{total} | Time: {duration}s | ETA: {eta}s',
-            clearOnComplete: true,
+            // clearOnComplete: true,
             hideCursor: true,
             barsize: 25
         },

@@ -40,6 +40,7 @@
         "#lib/*": "./src/lib/*",
         "#constants/*": "./src/constants/*",
         "#utils/*": "./src/utils/*",
-        "#config/*": "./src/config/*"
+        "#config/*": "./src/config/*",
+        "#error/*": "./src/error/*"
     }
 }

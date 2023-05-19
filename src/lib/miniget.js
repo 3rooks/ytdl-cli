@@ -1,3 +1,5 @@
+import { FORMATS } from '#constants/formats.js';
+import { OUTPUT_PATH } from '#utils/paths.js';
 import { createWriteStream, existsSync } from 'fs';
 import { mkdir } from 'fs/promises';
 import Miniget from 'miniget';
@@ -10,17 +12,17 @@ export const saveImage = async (imgUrl, channelId) => {
     const url = imgUrl.replace(/=s\d+/, '=s1080');
     const imgStream = await Miniget(url);
 
-    const imgTemplate = `${channelId}_${Date.now()}.jpg`;
+    const imgTemplate = `${channelId}_${Date.now()}.${FORMATS.JPG}`;
     const outputPath = join(path, imgTemplate);
 
     const outStream = createWriteStream(outputPath);
     await pipeline([imgStream, outStream]);
 
-    return outputPath;
+    return imgTemplate;
 };
 
 const existFolder = async (channelId) => {
-    const path = join(process.env.OUTPUT_PATH, channelId);
+    const path = join(OUTPUT_PATH, channelId);
 
     if (existsSync(path)) return path;
 
