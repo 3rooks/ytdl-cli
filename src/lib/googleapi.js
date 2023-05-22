@@ -49,3 +49,24 @@ export const getVideoInfo = async (videoId) => {
 
     return videoInfo;
 };
+
+export const getChannelInfo = async (channelId) => {
+    const { data } = await youtube.channels.list({
+        part: 'snippet,statistics',
+        id: channelId
+    });
+
+    const channelInfo = {
+        channelId: data.items[0].id,
+        name: data.items[0].snippet.title,
+        user: data.items[0].snippet.customUrl || 'undefined',
+        channel_url: `https://www.youtube.com/channel/${data.items[0].id}`,
+        user_url: `https://www.youtube.com/${data.items[0].snippet.customUrl}`,
+        description: data.items[0].snippet.description,
+        thumbnails: data.items[0].snippet.thumbnails,
+        video_count: data.items[0].statistics.videoCount,
+        subscriber_count: data.items[0].statistics.subscriberCount
+    };
+
+    return channelInfo;
+};

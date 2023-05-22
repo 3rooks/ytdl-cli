@@ -1,13 +1,12 @@
 import { FORMATS } from '#constants/formats.js';
-import { OUTPUT_PATH } from '#utils/paths.js';
-import { createWriteStream, existsSync } from 'fs';
-import { mkdir } from 'fs/promises';
+import { folderExists } from '#utils/folder-exists.js';
+import { createWriteStream } from 'fs';
 import Miniget from 'miniget';
 import { join } from 'path';
 import { pipeline } from 'stream/promises';
 
 export const saveImage = async (imgUrl, channelId) => {
-    const path = await existFolder(channelId);
+    const path = await folderExists(channelId);
 
     const url = imgUrl.replace(/=s\d+/, '=s1080');
     const imgStream = await Miniget(url);
@@ -19,14 +18,4 @@ export const saveImage = async (imgUrl, channelId) => {
     await pipeline([imgStream, outStream]);
 
     return imgTemplate;
-};
-
-const existFolder = async (channelId) => {
-    const path = join(OUTPUT_PATH, channelId);
-
-    if (existsSync(path)) return path;
-
-    await mkdir(path, { recursive: true });
-
-    return path;
 };

@@ -1,22 +1,16 @@
-import { COLORS } from '#constants/colors.js';
 import figlet from 'figlet';
 
-const { BLUE } = COLORS;
-
-export const initTitle = (title) => {
+export const initTitle = async (title) => {
     return new Promise((resolve, reject) =>
         figlet.text(
             title,
             {
-                font: 'ASCII New Roman',
+                font: 'Efti Water',
                 width: 100
             },
             (error, data) => {
                 if (error) reject(error);
-                else {
-                    console.log(BLUE, data, '\n');
-                    resolve(null);
-                }
+                else resolve(data);
             }
         )
     );

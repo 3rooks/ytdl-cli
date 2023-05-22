@@ -1,7 +1,8 @@
-import { DOWNLOAD_OPTIONS } from '#constants/dl.js';
+import { CODE } from '#constants/code.js';
+import { COLORS } from '#constants/colors.js';
+import { DOWNLOAD_OPTIONS } from '#constants/dl-options.js';
 import { YT_DOMAIN } from '#constants/regex.js';
-import { STATUS } from '#constants/status.js';
-import { Status } from '#error/error.js';
+import { Exception } from '#error/error.js';
 import { createPromptModule } from 'inquirer';
 
 const prompt = createPromptModule();
@@ -25,19 +26,14 @@ export const userInput = async () => {
 
         return answer;
     } catch (error) {
-        Status.catch(error);
+        Exception.catch(error);
     }
 };
 
 const validate = (input) => {
-    try {
-        if (YT_DOMAIN.test(input)) return true;
-        else
-            throw new Status({
-                status: STATUS.ERROR,
-                message: 'INVALID_YOUTUBE_URL'
-            });
-    } catch (error) {
-        Status.catch(error);
+    if (YT_DOMAIN.test(input)) return true;
+    else {
+        console.log('\n\n' + COLORS.RED, 'INVALID_YOUTUBE_URL');
+        process.exit(CODE.BAD);
     }
 };
