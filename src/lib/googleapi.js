@@ -1,8 +1,9 @@
+import { ENV } from '#config/env.js';
 import { google } from 'googleapis';
 
 const youtube = google.youtube({
     version: 'v3',
-    auth: process.env.GOOGLE_KEY
+    auth: ENV.GOOGLE
 });
 
 export const getAllVideosFromChannel = async (channelId) => {

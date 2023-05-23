@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import '#config/env.js';
 import { STATUS } from '#constants/status.js';
 import { Exception } from '#error/error.js';
 import { downloader } from '#lib/dl/yt-dl.js';
