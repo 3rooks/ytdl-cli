@@ -21,4 +21,4 @@ const bootstrap = async () => {
     }
 };
 
-await bootstrap();
+bootstrap();
